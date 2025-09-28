@@ -3,6 +3,6 @@ from .views import LoginView
 from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
-    path('login/', LoginView.as_view(), name='token_obtain_pair'),
+    path('login/', LoginView.as_view(), name='token_obtain_pair'),  # <-- usa tu LoginView
     path('refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]
