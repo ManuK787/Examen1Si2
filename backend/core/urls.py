@@ -1,3 +1,10 @@
+from django.contrib import admin
+from django.urls import path, include
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
+
 """
 URL configuration for core project.
 
@@ -16,9 +23,20 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from accounts.views import ping
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("api/ping/", ping),
+    path('api/auth/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+
+    # módulos
+    path('api/auth/', include('usuarios.urls')),
+    path('api/roles/', include('roles.urls')),
+    path('api/propiedades/', include('propiedades.urls')),
+    path('api/vehiculos/', include('vehiculos.urls')),
+    path('api/areas-comunes/', include('areas_comunes.urls')),
+    path('api/reservas/', include('reservas.urls')),
+    path('api/mantenimiento/', include('mantenimiento.urls')),
+    path('api/avisos/', include('avisos.urls')),
+    path('api/seguridad/', include('seguridad.urls')),
 ]

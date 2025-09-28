@@ -11,30 +11,21 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
-import os
-from dotenv import load_dotenv
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-
-# SECRET_KEY = 'django-insecure-(&mzye$^)gm0%5#5%_&g--vc=enss%v8vx5mxjz_w7npn&#s$_'
-# Modificado para usar variables de entorno (manu)
-SECRET_KEY = os.getenv("SECRET_KEY", "change-me")
+SECRET_KEY = 'django-insecure-uy_b!=am+m^)e4gjhx#5bb@)@amkyr$ck0-q9t@mud4u5wydn='
 
 # SECURITY WARNING: don't run with debug turned on in production!
-#DEBUG = True
-# Modificado para usar variables de entorno (manu)
-DEBUG = os.getenv("DEBUG", "0") == "1"
+DEBUG = True
 
-# ALLOWED_HOSTS = []
-# Modificado para usar variables de entorno (manu)
-ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "").split(",") if h.strip()]
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -46,26 +37,49 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'usuarios',
+    'roles',
+    'propiedades',
+    'vehiculos',
+    'areas_comunes',
+    'reservas',
+    'mantenimiento',
+    'avisos',
+    'seguridad',
+
+    # DRF y extras
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'corsheaders', 
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+}
+
+CORS_ALLOW_ALL_ORIGINS = True  # luego puedes restringir al dominio del frontend
+
+
+
 MIDDLEWARE = [
-    # "corsheaders.middleware.CorsMiddleware",  # Remove for clean project
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
-# CORS_ALLOW_CREDENTIALS = True
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:5173",
-#     "http://127.0.0.1:5173",
-# ]
-
 ROOT_URLCONF = 'core.urls'
+
 
 TEMPLATES = [
     {
@@ -84,29 +98,25 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
+# IDs grandes
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Usuario personalizado
+AUTH_USER_MODEL = 'usuarios.Usuario'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
-# Modificado para usar PostgreSQL y variables de entorno (manu)
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv("DB_NAME", "si2e1_db"),
-        "USER": os.getenv("DB_USER", "si2e1_user"),
-        "PASSWORD": os.getenv("DB_PASS", ""),
-        "HOST": os.getenv("DB_HOST", "127.0.0.1"),
-        "PORT": os.getenv("DB_PORT", "5432"),
+    'default': {
+        'ENGINE':   'django.db.backends.postgresql',
+        'NAME':     'smart_condominium',
+        'USER':     'smart_user',
+        'PASSWORD':  '071104',
+        'HOST':      'localhost', 
+        'PORT':      '5432',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
