@@ -1,0 +1,59 @@
+“Smart Condominium” 
+Proyecto: Aplicación Móvil y Web con Inteligencia Artificial para Administración de 
+Condominios 
+Se requiere desarrollar una aplicación móvil y web para la gestión de condominios residenciales, 
+con funcionalidades de administración, seguridad y finanzas, incorporando además servicios de 
+inteligencia artificial con visión artificial para reforzar la seguridad, automatizar procesos y 
+mejorar la experiencia de los residentes.
+
+Funcionalidades en la Aplicación Web 
+1. Gestión Administrativa 
+• Registro de usuarios, roles y unidades habitacionales. 
+• Administración de cuotas y reportes financieros. 
+• Configuración de precios de expensas, multas y otros 
+• Publicación de avisos generales. 
+2. Seguridad con IA 
+• Control centralizado de cámaras con visión artificial para: 
+
+Reconocimiento facial de residentes autorizados. 
+Detección automática de visitantes no registrados. 
+Identificación de vehículos (lectura automática de placas con OCR). 
+Alertas de comportamiento sospechoso (ej. Perros sueltos dentro el 
+condominio, perros haciendo necesidades, vehículos mal estacionados en 
+zona de parqueo y otros) 
+• Registro automático de ingresos/salidas de visitantes con foto. 
+Sistemas de Información II 
+3. Gestión de Áreas Comunes 
+• Configuración de disponibilidad y horarios. 
+• Reportes de uso de instalaciones. 
+• Generación de ingresos por alquiler de espacios comunes. 
+4. 5. Gestión de Mantenimiento 
+• Asignación de tareas a personal interno o externo. 
+• Seguimiento de mantenimientos preventivos. 
+• Reportes de costos asociados a reparaciones. 
+5. Reportes y Analítica  
+• Indicadores financieros (morosidad, ingresos/egresos). 
+• Estadísticas de seguridad con IA (accesos no autorizados, incidentes detectados). 
+• Uso de áreas comunes y servicios. 
+• Reportes visuales para toma de decisiones. 
+
+---
+Roadmap Módulo Comunicados (Announcements)
+Fase actual: CRUD básico con estados draft/scheduled/published/archived/cancelled y métricas simples.
+
+Próximas iteraciones sugeridas:
+1. Adjuntos (imágenes/PDF) por anuncio (endpoint /announcements/{id}/attachments/)
+2. Segmentación de audiencia (roles, bloques, unidades) para envío dirigido
+3. Notificaciones push / WebSocket para publicación en tiempo real
+4. Métricas avanzadas: tasa de lectura (%), tiempo medio a primera lectura
+5. Búsqueda full‑text y filtrado por rango de fechas de publicación
+6. Versionado de contenido / historial de ediciones
+7. Programación recurrente (ej. recordatorios mensuales)
+8. Integración con email gateway (enviar copia a correos registrados)
+9. Accesibilidad: markdown seguro + previews, sanitización HTML
+10. Auditoría: registro de acciones (publish, archive, cancel) con usuario y timestamp
+
+Dependencias técnicas futuras:
+- Servicio de colas / scheduler para auto-publicación robusta (ej. Redis + worker)
+- CDN o bucket para almacenamiento de adjuntos (S3 / Azure Blob / GCS)
+- Canal WebSocket/SSE (ej. /ws/announcements) para notificaciones instantáneas

@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+html, body, #root { height: 100%; }
+body { font-family: Inter, system-ui, sans-serif; background-color: #f8fafc; color: #1e293b; -webkit-font-smoothing: antialiased; }
+
+/* Fallback utilidades manuales (sin @apply) */
+.btn { display:inline-flex; align-items:center; justify-content:center; border-radius:0.5rem; padding:0.5rem 1rem; font-size:0.875rem; font-weight:500; background:#3a2d19; color:#ffffff; transition:background .15s; }
+.btn:hover { background:#e8373e; color:#000000; }
+.btn:disabled { opacity:.6; cursor:not-allowed; }
+.btn-outline { display:inline-flex; align-items:center; justify-content:center; border-radius:0.5rem; padding:0.5rem 1rem; font-size:0.875rem; font-weight:500; border:1px solid #3a2d19; color:#3a2d19; background:#ffffff; }
+.btn-outline:hover { background:#c3d297; }
+.btn-accent { display:inline-flex; align-items:center; justify-content:center; border-radius:0.5rem; padding:0.5rem 1rem; font-size:0.875rem; font-weight:500; background:#e8373e; color:#ffffff; box-shadow:0 1px 2px rgba(0,0,0,.1); }
+.btn-accent:hover { filter:brightness(0.95); }
+.btn-soft { display:inline-flex; align-items:center; justify-content:center; border-radius:0.5rem; padding:0.5rem 1rem; font-size:0.875rem; font-weight:500; background:#c3d297; color:#3a2d19; }
+.btn-soft:hover { filter:brightness(0.95); }
+.btn-muted { display:inline-flex; align-items:center; justify-content:center; border-radius:0.5rem; padding:0.5rem 1rem; font-size:0.875rem; font-weight:500; background:#c3b199; color:#3a2d19; }
+.btn-muted:hover { filter:brightness(0.95); }
+.btn-ghost { display:inline-flex; align-items:center; justify-content:center; border-radius:0.5rem; padding:0.5rem 1rem; font-size:0.875rem; font-weight:500; background:transparent; color:#3a2d19; }
+.btn-ghost:hover { background:#c3d297; }
+.card { background:#fff; border:1px solid #e2e8f0; border-radius:0.75rem; padding:1.25rem; box-shadow:0 1px 2px rgba(0,0,0,0.05); }
+.kpi { display:flex; flex-direction:column; gap:0.25rem; }
+.kpi-title { font-size:0.75rem; font-weight:500; text-transform:uppercase; color:#64748b; letter-spacing:.05em; }
+.kpi-value { font-size:1.5rem; font-weight:600; color:#1e293b; }
+
+a { color:#3a2d19; text-underline-offset:2px; }
+/* Evitamos que un enlace con clase .btn herede este color hover */
+a:hover { color:#e8373e; }
+.btn:hover, .btn:focus { text-decoration:none; }
