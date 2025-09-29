@@ -528,6 +528,155 @@ POST /maintenance-tasks/12/status/
 ---
 
 
+## Conceptos Financieros (Expensas, Multas, Otros)  (Fase 1)
+Configuración de conceptos cobrables. Soporta versiones (schedule de cambio de monto/ cálculo) y habilitar/deshabilitar.
+
+Estados actuales: `active`, `inactive` (cuando se deshabilita). Se permiten futuras ampliaciones (`archived`).
+
+Métodos de cálculo (fase 1):
+- `fixed`: monto fijo tomado de `calculation.base_amount`.
+- `per_unit`: monto = `base_amount * unidades` (frontend enviará unidades en contexto de cálculo / facturación, no en este módulo).
+- `per_m2`: monto = `base_amount * total_m2` (similar, cálculo externo luego).
+
+Periodicidad: `monthly` | `quarterly` | `yearly` | `one_time`.
+
+Scope (`scope.applies_to`): `all` | `blocks` | `property_types` | `infractions` (para multas específicas). Listas asociadas según el valor.
+
+### Endpoints
+| Acción | Método | Endpoint | Query Params / Body | Notas |
+|--------|--------|----------|---------------------|-------|
+| Listar | GET | `/financial-concepts/` | `page,page_size,status,periodicity,concept_type,search` | Respuesta paginada |
+| Crear | POST | `/financial-concepts/` | `{ name, code?, description?, concept_type, calculation:{ method, base_amount, currency, unit_basis? }, periodicity, scope:{ applies_to, blocks?, property_types?, infractions? }, valid_from?, valid_to? }` | Devuelve objeto completo con versión inicial |
+| Detalle (futuro) | GET | `/financial-concepts/{id}/` | - | - |
+| Actualizar | PATCH | `/financial-concepts/{id}/` | subset de campos (no modifica histórico de versiones) | Cambios sobre la versión vigente (si cambia calculation/base_amount considerar schedule mejor) |
+| Programar nueva versión | POST | `/financial-concepts/{id}/schedule-version/` | `{ calculation:{ base_amount, currency?, unit_basis? } , valid_from }` | Crea entrada en `versioning.scheduled` |
+| Habilitar | POST | `/financial-concepts/{id}/enable/` | - | Cambia `status` a `active` |
+| Deshabilitar | POST | `/financial-concepts/{id}/disable/` | - | Cambia `status` a `inactive` |
+| Clonar | POST | `/financial-concepts/{id}/clone/` | - | Devuelve nuevo concepto en `draft` o `active` (decisión backend; UI aceptará `active`) |
+| Eliminar | DELETE | `/financial-concepts/{id}/` | - | Sólo permitido si no tiene movimientos asociados (regla backend) |
+
+### Modelo Backend -> Frontend (propuesto)
+```
+{
+  id,
+  name,
+  code?,
+  description?,
+  concept_type: 'fee'|'fine'|'misc',
+  status: 'active'|'inactive',
+  calculation: {                 // vigente (versión actual)
+    method: 'fixed'|'per_unit'|'per_m2',
+    base_amount: number,
+    currency: 'BOB',
+    unit_basis?: string|null
+  },
+  periodicity: 'monthly'|'quarterly'|'yearly'|'one_time',
+  scope: {
+    applies_to: 'all'|'blocks'|'property_types'|'infractions',
+    blocks: [],
+    property_types: [],
+    infractions: [],
+    selection_ids?: []           // reservado futuro
+  },
+  versioning: {
+    current: {
+      valid_from: string|null,   // ISO date
+      valid_to: string|null
+    },
+    scheduled?: [                // próximas versiones
+      {
+        id,
+        calculation: { method, base_amount, currency, unit_basis? },
+        valid_from: string       // fecha efectiva futura
+      }
+    ]
+  },
+  created_at,
+  updated_at
+}
+```
+
+### Normalización Frontend
+`normalizeFinancialConcept` (interno) mapea snake_case -> camelCase y asegura defaults:
+```
+{
+  id,
+  name,
+  code,
+  description,
+  conceptType,
+  status,
+  calculation: { method, baseAmount, currency, unitBasis },
+  periodicity,
+  scope: { appliesTo, blocks, propertyTypes, infractions, selectionIds: [] },
+  versioning: { current: { validFrom, validTo }, scheduled: [...] },
+  createdAt,
+  updatedAt
+}
+```
+
+### Serialización Front -> Back (crear / actualizar)
+| Front | Back |
+|-------|------|
+| name | name |
+| code | code |
+| description | description |
+| conceptType | concept_type |
+| calculation.baseAmount | calculation.base_amount |
+| calculation.unitBasis | calculation.unit_basis |
+| periodicity | periodicity |
+| scope.appliesTo | scope.applies_to |
+| scope.blocks | scope.blocks |
+| scope.propertyTypes | scope.property_types |
+| scope.infractions | scope.infractions |
+| versioning.current.validFrom (crear) | valid_from |
+| versioning.current.validTo (crear) | valid_to |
+
+### Programar Versión
+Request:
+```
+POST /financial-concepts/5/schedule-version/
+{ "calculation": { "base_amount": 180.00 }, "valid_from": "2025-03-01" }
+```
+Response (concepto completo actualizado)
+```
+{ id:5, versioning:{ current:{...}, scheduled:[ { id:22, calculation:{ base_amount:180 }, valid_from:"2025-03-01" } ] }, ... }
+```
+
+### Listado Paginado
+```
+{
+  count: number,
+  results: [ { id, name, concept_type, status, calculation:{...}, periodicity, ... } ]
+}
+```
+
+### Validaciones Backend Esperadas
+- `name` requerido (1-120)
+- `concept_type` ∈ {fee,fine,misc}
+- `calculation.method` válido; `base_amount >= 0`
+- Si método `per_unit` esperar `unit_basis` (string no vacío)
+- `valid_from` futuro permitido; si vacío => vigente inmediata
+- En schedule-version: `valid_from` debe ser > hoy y > a todas las versiones programadas existentes
+- No permitir dos versiones distintas con mismo `valid_from`
+- Deshabilitar (disable) no elimina: sólo `status='inactive'`
+- Eliminar: restringir si existe referencia (pagos generados) (front tratará 409 con mensaje)
+
+### Errores
+```
+{ detail: "mensaje" }  // general
+{ field: ["mensaje"] } // validación específica
+```
+
+### Futuro (Fases siguientes)
+- Fórmulas avanzadas (por porcentaje m2, topes, escalas por rango)
+- Timeline histórico completo (`versioning.history`)
+- Auditoría de cambios
+- Asociación directa a propiedades / residentes específicos
+- Simulador de liquidación antes de publicar cambios
+
+---
+
 ## Comunicados (Announcements)
 Sistema para publicar avisos internos a residentes/personal. Soporta ciclo de vida: borrador, programado, publicado, archivado, cancelado.
 
